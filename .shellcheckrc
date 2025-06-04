@@ -1,0 +1,8 @@
+# ShellCheck configuration for Sarah AI
+
+# Exclude SC1091 - Not following non-constant source
+# Exclude SC2312 - Masking return value in command substitution (false positive for install scripts)
+exclude=SC1091,SC2312
+
+# Set shell
+shell=bash

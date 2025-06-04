@@ -126,7 +126,7 @@ ollama pull llama2:13b-chat
 echo "Note: Larger models (70B) can be downloaded later with: ollama pull llama3.1:70b-instruct-q4_0"
 
 # Kill the Ollama service (we'll run it properly later)
-kill $OLLAMA_PID 2>/dev/null
+kill "${OLLAMA_PID}" 2>/dev/null
 
 # Create project structure
 echo "📁 Creating project structure..."

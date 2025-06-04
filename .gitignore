@@ -107,3 +107,32 @@ temp/
 /logs/
 /models/
 /cache/
+
+# Swift and Xcode
+*.xcworkspace/
+xcuserdata/
+*.xcuserstate
+*.xccheckout
+*.moved-aside
+DerivedData/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+Pods/
+Carthage/Build/
+.build/
+*.playground/timeline.xctimeline
+playground.xcworkspace
+.swiftpm/
+Package.resolved
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcworkspace/contents.xcworkspacedata
+/*.gcno
+
+# Swift Package Manager
+Packages/
+Package.pins
+.swiftpm
