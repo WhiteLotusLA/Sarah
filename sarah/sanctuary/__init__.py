@@ -7,9 +7,9 @@ from .encryption import Encryptor
 from .permissions import PermissionManager
 
 __all__ = [
-    'AuthManager',
-    'create_access_token',
-    'verify_token',
-    'Encryptor',
-    'PermissionManager'
+    "AuthManager",
+    "create_access_token",
+    "verify_token",
+    "Encryptor",
+    "PermissionManager",
 ]
