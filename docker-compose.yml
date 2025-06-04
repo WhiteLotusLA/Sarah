@@ -1,0 +1,163 @@
+version: '3.9'
+
+services:
+  # PostgreSQL with extensions
+  postgres:
+    image: postgres:17-alpine
+    container_name: sarah-postgres
+    environment:
+      POSTGRES_USER: sarah
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sarah_secure_password}
+      POSTGRES_DB: sarah_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/setup_extensions.sql:/docker-entrypoint-initdb.d/01-extensions.sql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/02-schema.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sarah -d sarah_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sarah-network
+
+  # Redis for pub/sub
+  redis:
+    image: redis:8-alpine
+    container_name: sarah-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sarah-network
+
+  # Ollama for local AI
+  ollama:
+    image: ollama/ollama:latest
+    container_name: sarah-ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    networks:
+      - sarah-network
+
+  # Sarah AI Backend
+  sarah-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sarah-backend
+    environment:
+      - DATABASE_URL=postgresql://sarah:${POSTGRES_PASSWORD:-sarah_secure_password}@postgres:5432/sarah_db
+      - REDIS_URL=redis://redis:6379/0
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-your-secret-key-here}
+      - MICROSOFT_CLIENT_ID=${MICROSOFT_CLIENT_ID:-}
+      - MICROSOFT_CLIENT_SECRET=${MICROSOFT_CLIENT_SECRET:-}
+      - MICROSOFT_TENANT_ID=${MICROSOFT_TENANT_ID:-}
+      - SARAH_ENV=production
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - sarah-network
+
+  # Nginx for frontend and reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: sarah-nginx
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - sarah-backend
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - sarah-network
+
+  # Prometheus for monitoring (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: sarah-prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090"
+    networks:
+      - sarah-network
+    profiles:
+      - monitoring
+
+  # Grafana for visualization (optional)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: sarah-grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - sarah-network
+    profiles:
+      - monitoring
+
+volumes:
+  postgres_data:
+  redis_data:
+  ollama_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  sarah-network:
+    driver: bridge

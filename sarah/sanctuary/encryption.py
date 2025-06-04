@@ -283,5 +283,3 @@ def encrypt(data: Union[str, bytes]) -> str:
 def decrypt(encrypted_data: str) -> str:
     """Convenience function to decrypt data"""
     return get_encryptor().decrypt(encrypted_data)
-
-

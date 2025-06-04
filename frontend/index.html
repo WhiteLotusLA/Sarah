@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sarah AI - Personal Assistant</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <h1 class="app-title">Sarah AI</h1>
+          <p class="app-subtitle">Your Personal Assistant</p>
+        </div>
+
+        <nav class="nav-menu">
+          <a href="#chat" class="nav-item active" data-page="chat">
+            <span class="material-icons">chat</span>
+            <span>Chat</span>
+          </a>
+          <a href="#agents" class="nav-item" data-page="agents">
+            <span class="material-icons">smart_toy</span>
+            <span>Agents</span>
+          </a>
+          <a href="#tasks" class="nav-item" data-page="tasks">
+            <span class="material-icons">task_alt</span>
+            <span>Tasks</span>
+          </a>
+          <a href="#calendar" class="nav-item" data-page="calendar">
+            <span class="material-icons">calendar_today</span>
+            <span>Calendar</span>
+          </a>
+          <a href="#emails" class="nav-item" data-page="emails">
+            <span class="material-icons">email</span>
+            <span>Emails</span>
+          </a>
+          <a href="#settings" class="nav-item" data-page="settings">
+            <span class="material-icons">settings</span>
+            <span>Settings</span>
+          </a>
+        </nav>
+
+        <div class="user-section">
+          <div class="user-info">
+            <span class="material-icons">account_circle</span>
+            <span id="username">Guest</span>
+          </div>
+          <button class="logout-btn" id="logoutBtn">Logout</button>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Chat Page -->
+        <section id="chatPage" class="page active">
+          <div class="page-header">
+            <h2>Chat with Sarah</h2>
+            <div class="connection-status">
+              <span class="status-indicator" id="connectionStatus"></span>
+              <span id="connectionText">Disconnected</span>
+            </div>
+          </div>
+
+          <div class="chat-container">
+            <div class="messages-container" id="messagesContainer">
+              <div class="welcome-message">
+                <h3>Welcome to Sarah AI</h3>
+                <p>
+                  I'm here to help you with tasks, scheduling, emails, and more.
+                  How can I assist you today?
+                </p>
+              </div>
+            </div>
+
+            <div class="input-container">
+              <textarea
+                id="messageInput"
+                placeholder="Type your message..."
+                rows="1"
+              ></textarea>
+              <button id="sendBtn" class="send-btn">
+                <span class="material-icons">send</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Agents Page -->
+        <section id="agentsPage" class="page">
+          <div class="page-header">
+            <h2>Agent Status</h2>
+            <button class="refresh-btn" id="refreshAgentsBtn">
+              <span class="material-icons">refresh</span>
+            </button>
+          </div>
+
+          <div class="agents-grid" id="agentsGrid">
+            <!-- Agent cards will be populated here -->
+          </div>
+        </section>
+
+        <!-- Tasks Page -->
+        <section id="tasksPage" class="page">
+          <div class="page-header">
+            <h2>Tasks</h2>
+            <button class="add-btn" id="addTaskBtn">
+              <span class="material-icons">add</span>
+              Add Task
+            </button>
+          </div>
+
+          <div class="tasks-container">
+            <div class="task-filters">
+              <button class="filter-btn active" data-filter="all">All</button>
+              <button class="filter-btn" data-filter="pending">Pending</button>
+              <button class="filter-btn" data-filter="completed">
+                Completed
+              </button>
+              <button class="filter-btn" data-filter="overdue">Overdue</button>
+            </div>
+
+            <div class="tasks-list" id="tasksList">
+              <!-- Tasks will be populated here -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Calendar Page -->
+        <section id="calendarPage" class="page">
+          <div class="page-header">
+            <h2>Calendar</h2>
+            <button class="add-btn" id="addEventBtn">
+              <span class="material-icons">add</span>
+              Add Event
+            </button>
+          </div>
+
+          <div class="calendar-container">
+            <div class="calendar-controls">
+              <button id="prevMonthBtn">
+                <span class="material-icons">chevron_left</span>
+              </button>
+              <h3 id="currentMonth">January 2024</h3>
+              <button id="nextMonthBtn">
+                <span class="material-icons">chevron_right</span>
+              </button>
+            </div>
+
+            <div class="calendar-grid" id="calendarGrid">
+              <!-- Calendar will be populated here -->
+            </div>
+
+            <div class="events-list" id="eventsList">
+              <h4>Upcoming Events</h4>
+              <!-- Events will be populated here -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Emails Page -->
+        <section id="emailsPage" class="page">
+          <div class="page-header">
+            <h2>Emails</h2>
+            <button class="add-btn" id="composeEmailBtn">
+              <span class="material-icons">edit</span>
+              Compose
+            </button>
+          </div>
+
+          <div class="emails-container">
+            <div class="email-filters">
+              <button class="filter-btn active" data-folder="inbox">
+                Inbox
+              </button>
+              <button class="filter-btn" data-folder="sent">Sent</button>
+              <button class="filter-btn" data-folder="drafts">Drafts</button>
+              <button class="filter-btn" data-folder="spam">Spam</button>
+            </div>
+
+            <div class="emails-list" id="emailsList">
+              <!-- Emails will be populated here -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Settings Page -->
+        <section id="settingsPage" class="page">
+          <div class="page-header">
+            <h2>Settings</h2>
+          </div>
+
+          <div class="settings-container">
+            <div class="settings-section">
+              <h3>Account</h3>
+              <div class="setting-item">
+                <label>Email</label>
+                <input
+                  type="email"
+                  id="userEmail"
+                  placeholder="your@email.com"
+                />
+              </div>
+              <div class="setting-item">
+                <label>API Key</label>
+                <input type="password" id="apiKey" placeholder="sk-..." />
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <h3>Preferences</h3>
+              <div class="setting-item">
+                <label>
+                  <input type="checkbox" id="notificationsEnabled" />
+                  Enable notifications
+                </label>
+              </div>
+              <div class="setting-item">
+                <label>
+                  <input type="checkbox" id="autoResponseEnabled" />
+                  Enable auto-responses
+                </label>
+              </div>
+            </div>
+
+            <button class="save-btn" id="saveSettingsBtn">Save Settings</button>
+          </div>
+        </section>
+      </main>
+
+      <!-- Login Modal -->
+      <div id="loginModal" class="modal">
+        <div class="modal-content">
+          <h2>Login to Sarah AI</h2>
+          <form id="loginForm">
+            <div class="form-group">
+              <label>Username or Email</label>
+              <input type="text" id="loginUsername" required />
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" id="loginPassword" required />
+            </div>
+            <button type="submit" class="submit-btn">Login</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/websocket.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/agents.js"></script>
+    <script src="js/tasks.js"></script>
+    <script src="js/calendar.js"></script>
+    <script src="js/emails.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

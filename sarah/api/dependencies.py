@@ -196,5 +196,3 @@ require_write = RequirePermission(Permission.WRITE)
 require_memory_read = RequirePermission(Permission.MEMORY_READ)
 require_memory_write = RequirePermission(Permission.MEMORY_WRITE)
 require_agent_control = RequirePermission(Permission.AGENT_CONTROL)
-
-

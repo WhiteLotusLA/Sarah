@@ -1,0 +1,45 @@
+# Development override for docker-compose
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+version: '3.9'
+
+services:
+  # Override backend for development
+  sarah-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder  # Use builder stage for development
+    volumes:
+      - .:/app  # Mount source code for hot reload
+      - /app/venv  # Exclude venv from mount
+    environment:
+      - SARAH_ENV=development
+      - DEBUG=true
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  # PostgreSQL with exposed port for development
+  postgres:
+    ports:
+      - "5432:5432"
+
+  # Redis with exposed port for development
+  redis:
+    ports:
+      - "6379:6379"
+
+  # Skip nginx in development
+  nginx:
+    profiles:
+      - production
+
+  # Include monitoring by default in dev
+  prometheus:
+    profiles:
+      - development
+      - monitoring
+
+  grafana:
+    profiles:
+      - development
+      - monitoring

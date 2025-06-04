@@ -372,7 +372,9 @@ class AuthManager:
 
 
 # Convenience functions
-def create_access_token(user_id: str, additional_claims: Optional[Dict[str, Any]] = None) -> str:
+def create_access_token(
+    user_id: str, additional_claims: Optional[Dict[str, Any]] = None
+) -> str:
     """Create a JWT access token (convenience function)"""
     auth = AuthManager()
     return auth.create_access_token(user_id, additional_claims)

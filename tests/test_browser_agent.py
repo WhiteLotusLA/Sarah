@@ -8,8 +8,11 @@ import base64
 from datetime import datetime
 
 from sarah.agents.browser import (
-    BrowserAgent, BrowserAction, BrowserActionType,
-    WebElement, WebPageInfo
+    BrowserAgent,
+    BrowserAction,
+    BrowserActionType,
+    WebElement,
+    WebPageInfo,
 )
 
 
@@ -106,13 +109,12 @@ async def test_browser_agent_initialization(browser_agent):
 async def test_navigate(browser_agent, mock_page):
     """Test page navigation"""
     browser_agent.pages = {"default": mock_page}
-    
+
     success = await browser_agent.navigate("https://example.com")
-    
+
     assert success is True
     mock_page.goto.assert_called_once_with(
-        "https://example.com", 
-        wait_until="domcontentloaded"
+        "https://example.com", wait_until="domcontentloaded"
     )
 
 
@@ -120,18 +122,18 @@ async def test_navigate(browser_agent, mock_page):
 async def test_click(browser_agent, mock_page):
     """Test clicking elements"""
     browser_agent.pages = {"default": mock_page}
-    
+
     # Test normal click
     success = await browser_agent.click("button#submit")
-    
+
     assert success is True
     mock_page.wait_for_selector.assert_called_with("button#submit", state="visible")
     mock_page.click.assert_called_with("button#submit")
-    
+
     # Test click with navigation
     mock_page.expect_navigation = AsyncMock()
     success = await browser_agent.click("a#link", wait_for_navigation=True)
-    
+
     assert success is True
 
 
@@ -139,19 +141,17 @@ async def test_click(browser_agent, mock_page):
 async def test_type_text(browser_agent, mock_page):
     """Test typing text"""
     browser_agent.pages = {"default": mock_page}
-    
+
     # Test with clear first (default)
     success = await browser_agent.type_text("input#username", "testuser")
-    
+
     assert success is True
     mock_page.wait_for_selector.assert_called_with("input#username", state="visible")
     mock_page.fill.assert_called_with("input#username", "testuser")
-    
+
     # Test without clearing
-    success = await browser_agent.type_text(
-        "input#search", "query", clear_first=False
-    )
-    
+    success = await browser_agent.type_text("input#search", "query", clear_first=False)
+
     mock_page.type.assert_called_with("input#search", "query")
 
 
@@ -159,29 +159,26 @@ async def test_type_text(browser_agent, mock_page):
 async def test_extract_data(browser_agent, mock_page):
     """Test data extraction"""
     browser_agent.pages = {"default": mock_page}
-    
+
     # Mock elements
     mock_element = AsyncMock()
     mock_element.text_content = AsyncMock(return_value="Test Text")
     mock_page.query_selector = AsyncMock(return_value=mock_element)
-    
+
     # Test single element extraction
-    selectors = {
-        "title": "h1",
-        "description": "p.desc"
-    }
-    
+    selectors = {"title": "h1", "description": "p.desc"}
+
     result = await browser_agent.extract_data(selectors)
-    
+
     assert result["title"] == "Test Text"
     assert mock_page.query_selector.call_count == 2
-    
+
     # Test list extraction
     mock_elements = [mock_element, mock_element]
     mock_page.query_selector_all = AsyncMock(return_value=mock_elements)
-    
+
     result = await browser_agent.extract_data({"items": "li"}, as_list=True)
-    
+
     assert len(result["items"]) == 2
     assert all(item == "Test Text" for item in result["items"])
 
@@ -190,15 +187,17 @@ async def test_extract_data(browser_agent, mock_page):
 async def test_screenshot(browser_agent, mock_page):
     """Test screenshot capture"""
     browser_agent.pages = {"default": mock_page}
-    
+
     # Mock file operations
     mock_image_data = b"fake_image_data"
-    
+
     with patch("builtins.open", create=True) as mock_open:
-        mock_open.return_value.__enter__.return_value.read.return_value = mock_image_data
-        
+        mock_open.return_value.__enter__.return_value.read.return_value = (
+            mock_image_data
+        )
+
         result = await browser_agent.screenshot()
-        
+
         assert result == base64.b64encode(mock_image_data).decode()
         mock_page.screenshot.assert_called_once()
 
@@ -208,9 +207,9 @@ async def test_execute_script(browser_agent, mock_page):
     """Test JavaScript execution"""
     browser_agent.pages = {"default": mock_page}
     mock_page.evaluate.return_value = {"result": "success"}
-    
+
     result = await browser_agent.execute_script("return document.title")
-    
+
     assert result == {"result": "success"}
     mock_page.evaluate.assert_called_with("return document.title")
 
@@ -219,30 +218,30 @@ async def test_execute_script(browser_agent, mock_page):
 async def test_fill_form(browser_agent, mock_page):
     """Test form filling"""
     browser_agent.pages = {"default": mock_page}
-    
+
     # Mock element queries
     mock_input = AsyncMock()
     mock_input.evaluate = AsyncMock(side_effect=["input", "text"])
-    
+
     mock_select = AsyncMock()
     mock_select.evaluate = AsyncMock(return_value="select")
-    
+
     mock_checkbox = AsyncMock()
     mock_checkbox.evaluate = AsyncMock(side_effect=["input", "checkbox"])
-    
-    mock_page.query_selector = AsyncMock(side_effect=[
-        mock_input, mock_select, mock_checkbox
-    ])
-    
+
+    mock_page.query_selector = AsyncMock(
+        side_effect=[mock_input, mock_select, mock_checkbox]
+    )
+
     # Test form filling
     form_data = {
         "input#username": "testuser",
         "select#role": "admin",
-        "input#remember": "true"
+        "input#remember": "true",
     }
-    
+
     success = await browser_agent.fill_form(form_data, "button#submit")
-    
+
     assert success is True
     assert mock_page.fill.call_count == 1
     assert mock_page.select_option.call_count == 1
@@ -255,9 +254,9 @@ async def test_get_page_info(browser_agent, mock_page, sample_page_content):
     """Test getting page information"""
     browser_agent.pages = {"default": mock_page}
     mock_page.content.return_value = sample_page_content
-    
+
     info = await browser_agent.get_page_info()
-    
+
     assert info.url == "https://example.com"
     assert info.title == "Example Page"
     assert info.description == "A test page"
@@ -275,7 +274,7 @@ async def test_search_web(browser_agent, mock_page):
     browser_agent.navigate = AsyncMock(return_value=True)
     browser_agent.type_text = AsyncMock(return_value=True)
     browser_agent.click = AsyncMock(return_value=True)
-    
+
     # Mock search results
     mock_results = []
     for i in range(3):
@@ -286,16 +285,16 @@ async def test_search_web(browser_agent, mock_page):
         link_elem.get_attribute = AsyncMock(return_value=f"https://example{i+1}.com")
         snippet_elem = AsyncMock()
         snippet_elem.text_content = AsyncMock(return_value=f"Snippet {i+1}")
-        
-        result.query_selector = AsyncMock(side_effect=[
-            title_elem, link_elem, snippet_elem
-        ])
+
+        result.query_selector = AsyncMock(
+            side_effect=[title_elem, link_elem, snippet_elem]
+        )
         mock_results.append(result)
-    
+
     mock_page.query_selector_all = AsyncMock(return_value=mock_results)
-    
+
     results = await browser_agent.search_web("test query", num_results=3)
-    
+
     assert len(results) == 3
     assert results[0]["title"] == "Result 1"
     assert results[0]["url"] == "https://example1.com"
@@ -306,30 +305,30 @@ async def test_search_web(browser_agent, mock_page):
 async def test_smart_click(browser_agent, mock_page):
     """Test AI-powered smart click"""
     browser_agent.pages = {"default": mock_page}
-    
+
     # Mock clickable elements
     mock_page.evaluate.return_value = [
         {
             "index": 0,
             "tag": "button",
             "text": "Submit Form",
-            "selector": "button:nth-of-type(1)"
+            "selector": "button:nth-of-type(1)",
         },
         {
             "index": 1,
             "tag": "a",
             "text": "Click here to continue",
-            "selector": "a:nth-of-type(1)"
-        }
+            "selector": "a:nth-of-type(1)",
+        },
     ]
-    
+
     # Mock AI service
-    with patch('sarah.agents.browser.ollama_service') as mock_ollama:
+    with patch("sarah.agents.browser.ollama_service") as mock_ollama:
         mock_ollama.is_available.return_value = True
         mock_ollama.generate = AsyncMock(return_value="1")
-        
+
         success = await browser_agent.smart_click("continue button")
-        
+
         assert success is True
         mock_page.click.assert_called_with("a:nth-of-type(1)")
 
@@ -338,23 +337,24 @@ async def test_smart_click(browser_agent, mock_page):
 async def test_wait_for_condition(browser_agent, mock_page):
     """Test waiting for JavaScript condition"""
     browser_agent.pages = {"default": mock_page}
-    
+
     # Test successful wait
     mock_page.wait_for_function = AsyncMock()
-    
+
     success = await browser_agent.wait_for_condition(
         "document.readyState === 'complete'"
     )
-    
+
     assert success is True
     mock_page.wait_for_function.assert_called_once()
-    
+
     # Test timeout
     from playwright.async_api import TimeoutError as PlaywrightTimeout
+
     mock_page.wait_for_function = AsyncMock(side_effect=PlaywrightTimeout("Timeout"))
-    
+
     success = await browser_agent.wait_for_condition("false")
-    
+
     assert success is False
 
 
@@ -364,9 +364,9 @@ async def test_browser_action_dataclass():
     action = BrowserAction(
         action_type=BrowserActionType.CLICK,
         selector="button#submit",
-        description="Submit the form"
+        description="Submit the form",
     )
-    
+
     assert action.action_type == BrowserActionType.CLICK
     assert action.selector == "button#submit"
     assert action.description == "Submit the form"
@@ -377,12 +377,9 @@ async def test_browser_action_dataclass():
 async def test_web_element_dataclass():
     """Test WebElement dataclass"""
     element = WebElement(
-        tag="button",
-        text="Click Me",
-        selector="button.primary",
-        is_interactive=True
+        tag="button", text="Click Me", selector="button.primary", is_interactive=True
     )
-    
+
     assert element.tag == "button"
     assert element.text == "Click Me"
     assert element.is_interactive is True
@@ -393,17 +390,17 @@ async def test_web_element_dataclass():
 async def test_error_handling(browser_agent, mock_page):
     """Test error handling in various methods"""
     browser_agent.pages = {"default": mock_page}
-    
+
     # Test navigation error
     mock_page.goto = AsyncMock(side_effect=Exception("Network error"))
     success = await browser_agent.navigate("https://invalid.url")
     assert success is False
-    
+
     # Test click error
     mock_page.click = AsyncMock(side_effect=Exception("Element not found"))
     success = await browser_agent.click("invalid-selector")
     assert success is False
-    
+
     # Test type error
     mock_page.fill = AsyncMock(side_effect=Exception("Input not found"))
     success = await browser_agent.type_text("invalid-input", "text")

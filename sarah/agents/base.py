@@ -163,7 +163,9 @@ class BaseAgent(ABC):
             to_agent, MessageType.COMMAND, payload, priority, requires_response
         )
 
-    def register_handler(self, message_type: Union[MessageType, str], handler: Callable):
+    def register_handler(
+        self, message_type: Union[MessageType, str], handler: Callable
+    ):
         """Register a message handler"""
         if isinstance(message_type, str):
             # String-based command handler

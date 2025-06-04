@@ -261,5 +261,3 @@ async def revoke_role(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"User does not have role '{role}'",
         )
-
-
