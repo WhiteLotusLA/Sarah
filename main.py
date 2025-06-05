@@ -14,6 +14,8 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import asyncpg  # type: ignore
+import json
+import base64
 
 from sarah.core.consciousness import Consciousness
 from sarah.config import Config
@@ -23,6 +25,7 @@ from sarah.api.rate_limit_routes import router as rate_limit_router
 from sarah.api.dependencies import init_auth_dependencies, get_current_user_optional
 from sarah.services.backup import backup_service
 from sarah.services.rate_limiter import rate_limiter, ThrottleMiddleware
+from sarah.agents.voice import VoiceAgent
 
 # Configure logging
 logging.basicConfig(
@@ -57,12 +60,13 @@ app.include_router(rate_limit_router)
 # Global instances
 sarah: Optional[Consciousness] = None
 db_pool: Optional[asyncpg.Pool] = None
+voice_agent: Optional[VoiceAgent] = None
 
 
 @app.on_event("startup")
 async def startup_event():
     """Initialize Sarah on startup"""
-    global sarah, db_pool
+    global sarah, db_pool, voice_agent
     logger.info("🌸 Starting Sarah AI...")
 
     # Initialize database pool
@@ -83,6 +87,10 @@ async def startup_event():
 
     # Add rate limiting middleware
     app.add_middleware(ThrottleMiddleware, rate_limiter=rate_limiter)
+
+    # Initialize voice agent
+    voice_agent = VoiceAgent()
+    await voice_agent.initialize()
 
     logger.info("✨ Sarah AI is ready!")
 
@@ -164,6 +172,98 @@ async def websocket_endpoint(websocket: WebSocket):
 
     except WebSocketDisconnect:
         logger.info("WebSocket connection closed")
+
+
+@app.websocket("/ws/voice")
+async def voice_websocket(websocket: WebSocket):
+    """WebSocket endpoint for voice streaming"""
+    await websocket.accept()
+    logger.info("Voice WebSocket connection established")
+
+    if not voice_agent:
+        await websocket.send_json({"error": "Voice agent not initialized"})
+        await websocket.close()
+        return
+
+    try:
+        while True:
+            # Receive message from client
+            message = await websocket.receive_json()
+            command = message.get("command", "")
+
+            if command == "start_recording":
+                # Start voice recording
+                await voice_agent.start_recording()
+                await websocket.send_json({"status": "recording_started"})
+
+                # Start sending transcriptions
+                while voice_agent.is_recording:
+                    try:
+                        # Get transcription from queue (with timeout)
+                        transcription = await asyncio.wait_for(
+                            voice_agent.audio_queue.get(), timeout=0.5
+                        )
+                        await websocket.send_json(transcription)
+                    except asyncio.TimeoutError:
+                        continue
+
+            elif command == "stop_recording":
+                # Stop voice recording
+                await voice_agent.stop_recording()
+                await websocket.send_json({"status": "recording_stopped"})
+
+            elif command == "transcribe":
+                # One-shot transcription
+                audio_data = message.get("audio_data", "")
+                if audio_data:
+                    # Decode base64 audio data
+                    try:
+                        audio_bytes = base64.b64decode(audio_data)
+                        text = await voice_agent.transcribe_audio(audio_bytes)
+                        await websocket.send_json(
+                            {"type": "transcription", "text": text}
+                        )
+                    except Exception as e:
+                        await websocket.send_json(
+                            {
+                                "type": "error",
+                                "error": f"Transcription failed: {str(e)}",
+                            }
+                        )
+
+            elif command == "speak":
+                # Text-to-speech
+                text = message.get("text", "")
+                voice = message.get("voice", "default")
+                speed = message.get("speed", 1.0)
+
+                try:
+                    audio_path = await voice_agent.text_to_speech(text, voice, speed)
+                    # Read audio file and send as base64
+                    with open(audio_path, "rb") as f:
+                        audio_data = base64.b64encode(f.read()).decode()
+
+                    await websocket.send_json(
+                        {"type": "audio", "audio_data": audio_data, "format": "mp3"}
+                    )
+
+                    # Clean up
+                    audio_path.unlink()
+
+                except Exception as e:
+                    await websocket.send_json(
+                        {"type": "error", "error": f"TTS failed: {str(e)}"}
+                    )
+
+            elif command == "get_voices":
+                # Get available voices
+                voices = await voice_agent.get_available_voices()
+                await websocket.send_json({"type": "voices", "voices": voices})
+
+    except WebSocketDisconnect:
+        logger.info("Voice WebSocket connection closed")
+        if voice_agent.is_recording:
+            await voice_agent.stop_recording()
 
 
 def handle_shutdown(signum, frame):

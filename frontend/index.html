@@ -82,6 +82,16 @@
               </div>
             </div>
 
+            <div class="voice-controls">
+              <button id="record-button" class="voice-btn">
+                <span class="material-icons">mic</span>
+                Start Recording
+              </button>
+              <div id="voice-status" class="voice-status"></div>
+              <canvas id="audio-visualization" width="300" height="60"></canvas>
+              <div id="transcription" class="transcription-container"></div>
+            </div>
+
             <div class="input-container">
               <textarea
                 id="messageInput"
@@ -263,6 +273,7 @@
     <script src="js/tasks.js"></script>
     <script src="js/calendar.js"></script>
     <script src="js/emails.js"></script>
+    <script src="js/voice.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
   </body>

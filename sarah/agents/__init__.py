@@ -8,6 +8,7 @@ from .calendar import CalendarAgent
 from .task import TaskAgent
 from .email import EmailAgent
 from .browser import BrowserAgent
+from .voice import VoiceAgent
 
 __all__ = [
     "BaseAgent",
@@ -16,4 +17,5 @@ __all__ = [
     "TaskAgent",
     "EmailAgent",
     "BrowserAgent",
+    "VoiceAgent",
 ]

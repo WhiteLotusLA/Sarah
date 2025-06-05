@@ -602,6 +602,109 @@ body {
   margin-right: 8px;
 }
 
+/* Voice Interface */
+.voice-controls {
+  padding: 16px;
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.voice-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 24px;
+  background-color: var(--primary-color);
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.voice-btn:hover {
+  background-color: #1d4ed8;
+  transform: scale(1.05);
+}
+
+.voice-btn.recording {
+  background-color: var(--error-color);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+.voice-status {
+  font-size: 14px;
+  color: var(--text-secondary);
+  min-height: 20px;
+}
+
+.voice-status.success {
+  color: var(--success-color);
+}
+
+.voice-status.error {
+  color: var(--error-color);
+}
+
+.voice-status.info {
+  color: var(--primary-color);
+}
+
+#audio-visualization {
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--bg-tertiary);
+}
+
+.transcription-container {
+  max-height: 150px;
+  overflow-y: auto;
+  width: 100%;
+  padding: 8px;
+  background-color: var(--bg-tertiary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.transcription-item {
+  padding: 8px 12px;
+  margin-bottom: 4px;
+  background-color: var(--bg-primary);
+  border-radius: 4px;
+  font-size: 14px;
+  color: var(--text-primary);
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .sidebar {
@@ -621,5 +724,14 @@ body {
 
   .message-content {
     max-width: 85%;
+  }
+
+  .voice-controls {
+    padding: 12px;
+  }
+
+  #audio-visualization {
+    width: 250px;
+    height: 50px;
   }
 }

@@ -5,9 +5,11 @@ class App {
     this.currentPage = "chat";
     this.isAuthenticated = false;
     this.user = null;
+    this.voice = null;
 
     this.initializeEventListeners();
     this.checkAuthentication();
+    this.initializeVoice();
   }
 
   initializeEventListeners() {
@@ -272,6 +274,17 @@ class App {
         return "warning";
       default:
         return "info";
+    }
+  }
+
+  async initializeVoice() {
+    try {
+      this.voice = new VoiceInterface();
+      await this.voice.initialize();
+      console.log("Voice interface initialized");
+    } catch (error) {
+      console.error("Failed to initialize voice interface:", error);
+      this.showNotification("Voice interface unavailable", "warning");
     }
   }
 }

@@ -168,10 +168,14 @@
 
 ## Low Priority Tasks
 
-- [ ] **Implement voice interface with Whisper**
-    - Voice input/output
-    - Real-time transcription
-    - Text-to-speech
+- [x] **Implement voice interface with Whisper**
+    - Voice input/output with PyAudio streaming
+    - Real-time transcription using OpenAI Whisper
+    - Text-to-speech using macOS 'say' command
+    - WebSocket endpoints for voice streaming
+    - Frontend voice controls with audio visualization
+    - Voice Activity Detection (VAD) for automatic speech detection
+    - Complete test coverage for voice functionality
 
 - [ ] **Set up Prometheus and Grafana monitoring**
     - System metrics
@@ -199,6 +203,15 @@
     - Release management
 
 ## Recently Completed Tasks
+
+- [x] **Implement voice interface with Whisper** (2025-01-04)
+    - VoiceAgent with OpenAI Whisper integration for speech-to-text
+    - AudioStreamService for real-time audio capture with PyAudio
+    - Voice Activity Detection (VAD) for automatic speech boundaries
+    - Text-to-speech using macOS 'say' command (easily replaceable)
+    - WebSocket endpoints for voice streaming at /ws/voice
+    - Frontend voice controls with audio visualization
+    - Complete test coverage for both VoiceAgent and AudioStreamService
 
 - [x] **Implement rate limiting and throttling** (2025-01-03)
     - Redis-backed sliding window algorithm for distributed rate limiting
