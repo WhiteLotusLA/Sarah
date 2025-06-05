@@ -1,0 +1,131 @@
+version: '3.8'
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.41.0
+    container_name: sarah-prometheus
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/prometheus/rules:/etc/prometheus/rules
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    networks:
+      - sarah-network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:9.3.2
+    container_name: sarah-grafana
+    volumes:
+      - ./monitoring/grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3000:3000"
+    networks:
+      - sarah-network
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+  # Node exporter for system metrics
+  node-exporter:
+    image: prom/node-exporter:v1.5.0
+    container_name: sarah-node-exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    ports:
+      - "9100:9100"
+    networks:
+      - sarah-network
+    restart: unless-stopped
+
+  # PostgreSQL exporter
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.11.1
+    container_name: sarah-postgres-exporter
+    environment:
+      DATA_SOURCE_NAME: "postgresql://sarah:${DB_PASSWORD}@postgres:5432/sarah_db?sslmode=disable"
+    ports:
+      - "9187:9187"
+    networks:
+      - sarah-network
+    restart: unless-stopped
+    depends_on:
+      - postgres
+
+  # Redis exporter
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.45.0
+    container_name: sarah-redis-exporter
+    environment:
+      REDIS_ADDR: "redis:6379"
+    ports:
+      - "9121:9121"
+    networks:
+      - sarah-network
+    restart: unless-stopped
+    depends_on:
+      - redis
+
+  # cAdvisor for container metrics
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.46.0
+    container_name: sarah-cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    ports:
+      - "8080:8080"
+    networks:
+      - sarah-network
+    restart: unless-stopped
+    privileged: true
+    devices:
+      - /dev/kmsg
+
+  # Alertmanager
+  alertmanager:
+    image: prom/alertmanager:v0.25.0
+    container_name: sarah-alertmanager
+    volumes:
+      - ./monitoring/alerting/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - alertmanager_data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+    ports:
+      - "9093:9093"
+    networks:
+      - sarah-network
+    restart: unless-stopped
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  alertmanager_data:
+
+networks:
+  sarah-network:
+    external: true

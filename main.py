@@ -26,6 +26,15 @@ from sarah.api.dependencies import init_auth_dependencies, get_current_user_opti
 from sarah.services.backup import backup_service
 from sarah.services.rate_limiter import rate_limiter, ThrottleMiddleware
 from sarah.agents.voice import VoiceAgent
+from sarah.api.metrics import (
+    PrometheusMiddleware,
+    metrics_endpoint,
+    collect_system_metrics,
+    track_websocket_connect,
+    track_websocket_disconnect,
+    track_websocket_message,
+    update_agent_health,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -51,6 +60,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Add Prometheus metrics middleware
+app.add_middleware(PrometheusMiddleware)
 
 # Include routers
 app.include_router(auth_router)
@@ -92,6 +104,9 @@ async def startup_event():
     voice_agent = VoiceAgent()
     await voice_agent.initialize()
 
+    # Start system metrics collection
+    asyncio.create_task(collect_system_metrics())
+
     logger.info("✨ Sarah AI is ready!")
 
 
@@ -132,6 +147,12 @@ async def health_check():
     }
 
 
+@app.get("/metrics")
+async def get_metrics():
+    """Prometheus metrics endpoint"""
+    return metrics_endpoint()
+
+
 @app.get("/memory/stats")
 async def memory_stats():
     """Get memory system statistics"""
@@ -157,21 +178,26 @@ async def websocket_endpoint(websocket: WebSocket):
     """WebSocket endpoint for real-time communication"""
     await websocket.accept()
     logger.info("New WebSocket connection established")
+    track_websocket_connect("/ws")
 
     try:
         while True:
             # Receive message from client
             data = await websocket.receive_text()
+            track_websocket_message("/ws", "received")
 
             # Process with Sarah
             if sarah:
                 response = await sarah.process_intent(data)
                 await websocket.send_json(response)
+                track_websocket_message("/ws", "sent")
             else:
                 await websocket.send_json({"error": "Sarah is still awakening..."})
+                track_websocket_message("/ws", "sent")
 
     except WebSocketDisconnect:
         logger.info("WebSocket connection closed")
+        track_websocket_disconnect("/ws")
 
 
 @app.websocket("/ws/voice")
@@ -179,6 +205,7 @@ async def voice_websocket(websocket: WebSocket):
     """WebSocket endpoint for voice streaming"""
     await websocket.accept()
     logger.info("Voice WebSocket connection established")
+    track_websocket_connect("/ws/voice")
 
     if not voice_agent:
         await websocket.send_json({"error": "Voice agent not initialized"})
@@ -262,6 +289,7 @@ async def voice_websocket(websocket: WebSocket):
 
     except WebSocketDisconnect:
         logger.info("Voice WebSocket connection closed")
+        track_websocket_disconnect("/ws/voice")
         if voice_agent.is_recording:
             await voice_agent.stop_recording()
 

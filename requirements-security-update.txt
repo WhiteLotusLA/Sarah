@@ -1,0 +1,62 @@
+# Security Updates for Sarah AI Dependencies
+# Updated versions to address known vulnerabilities
+
+# Core Framework
+fastapi==0.115.6  # Updated from 0.109.0
+uvicorn[standard]==0.34.0  # Updated from 0.27.0
+pydantic==2.10.4  # Updated from 2.5.3
+
+# Database
+psycopg2-binary==2.9.10  # Updated from 2.9.9
+sqlalchemy==2.0.36  # Updated from 2.0.25
+alembic==1.14.0  # Updated from 1.13.1
+asyncpg==0.30.0  # Updated from 0.29.0
+
+# AI/ML
+langchain==0.3.15  # Updated from 0.1.1
+langchain-community==0.3.15  # Updated from 0.0.10
+openai==1.59.4  # Updated from 1.8.0
+tiktoken==0.8.0  # Updated from 0.5.2
+sentence-transformers==3.3.2  # Updated from 2.2.2
+numpy==1.26.4  # Updated from 1.26.3
+pandas==2.2.3  # Updated from 2.1.4
+
+# Vector Store
+pgvector==0.3.6  # Updated from 0.2.4
+
+# Redis
+redis==5.2.1  # Updated from 5.0.1
+celery==5.4.0  # Updated from 5.3.4
+
+# Audio
+openai-whisper==20231117  # Keep current
+pyaudio==0.2.14  # Keep current
+pydub==0.25.1  # Keep current
+
+# Monitoring
+prometheus-client==0.21.1  # Updated from 0.19.0
+
+# Development
+pytest==8.3.4  # Updated from 7.4.4
+pytest-asyncio==0.24.0  # Updated from 0.23.3
+black==24.11.0  # Updated from 23.12.1
+ruff==0.8.5  # Updated from 0.1.11
+mypy==1.14.1  # Updated from 1.8.0
+
+# Utilities - SECURITY CRITICAL UPDATES
+python-dotenv==1.0.1  # Updated from 1.0.0
+httpx==0.28.1  # Updated from 0.26.0
+pyyaml==6.0.2  # Updated from 6.0.1 - CVE fix
+jinja2==3.1.5  # Updated from 3.1.3 - CVE fix
+requests==2.32.3  # Updated from 2.31.0 - CVE fix
+aiohttp==3.11.11  # Updated from 3.9.1 - Multiple CVE fixes
+apscheduler==3.11.0  # Updated from 3.10.4
+python-multipart==0.0.19  # Updated from 0.0.6 - CVE fix
+
+# Microsoft Graph Integration
+msal==1.32.3  # Check for updates
+cryptography==45.0.0  # Updated from 41.0.7 - CRITICAL CVE fixes
+
+# Browser Automation
+playwright==1.49.1  # Updated from 1.40.0
+beautifulsoup4==4.12.3  # Updated from 4.12.2

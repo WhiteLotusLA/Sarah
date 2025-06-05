@@ -68,3 +68,7 @@ class Config:
             "CREATIVE": 8110,
         }
         return int(os.getenv(env_key, default_ports.get(agent_name.upper(), 8199)))
+
+
+# Create a default instance for compatibility
+config = Config()

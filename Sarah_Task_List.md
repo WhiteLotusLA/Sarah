@@ -177,20 +177,30 @@
     - Voice Activity Detection (VAD) for automatic speech detection
     - Complete test coverage for voice functionality
 
-- [ ] **Set up Prometheus and Grafana monitoring**
-    - System metrics
-    - Custom dashboards
-    - Alert configuration
+- [x] **Set up Prometheus and Grafana monitoring**
+    - System metrics with Node Exporter, PostgreSQL Exporter, Redis Exporter
+    - Custom Sarah AI Overview dashboard with key metrics
+    - Alert configuration for critical and warning conditions
+    - Prometheus metrics middleware for FastAPI
+    - Complete monitoring stack in docker-compose.monitoring.yml
+    - Comprehensive documentation in MONITORING.md
 
-- [ ] **Implement Home agent for automation**
-    - Smart home integration
-    - Device control
-    - Automation rules
+- [x] **Implement Home agent for automation**
+    - Smart home integration with multiple protocols (MQTT, Zigbee, HTTP)
+    - Device discovery, registration, and control
+    - Scene management for grouped device control
+    - Automation rules engine with triggers, conditions, and actions
+    - Protocol abstraction layer for extensibility
+    - Comprehensive test coverage
 
-- [ ] **Implement Finance agent for financial tracking**
-    - Budget and expense tracking
-    - Bill reminders
-    - Financial insights
+- [x] **Implement Finance agent for financial tracking** (2025-01-07)
+    - Budget and expense tracking with AI-powered categorization
+    - Bill reminders with recurring payment support
+    - Financial insights and spending analysis
+    - Account balance management (checking, savings, credit)
+    - Financial health score calculation
+    - Comprehensive database schema for financial data
+    - Complete test coverage
 
 - [ ] **Create API documentation with Swagger/OpenAPI**
     - Interactive API docs
@@ -204,7 +214,43 @@
 
 ## Recently Completed Tasks
 
-- [x] **Implement voice interface with Whisper** (2025-01-04)
+- [x] **Security vulnerability updates** (2025-01-07)
+    - Applied critical security updates for 23 vulnerabilities (7 high, 15 moderate, 1 low)
+    - Updated aiohttp 3.9.1 → 3.11.11 (multiple CVEs)
+    - Updated cryptography 41.0.7 → 45.0.0 (memory corruption fixes)
+    - Updated jinja2 3.1.3 → 3.1.5 (template injection CVE-2024-56201)
+    - Updated sqlalchemy, pyyaml, fastapi, python-multipart, requests
+    - Created SECURITY_UPDATE_SUMMARY.md documentation
+    - Fixed config.py import compatibility issue
+
+- [x] **Implement Finance agent for financial tracking** (2025-01-07)
+    - FinanceAgent with comprehensive financial management capabilities
+    - Transaction tracking (income, expense, transfer) with categorization
+    - Budget management with overspending alerts
+    - Bill reminders and recurring payment tracking
+    - Financial insights with AI-powered analysis
+    - Account balance tracking (checking, savings, credit)
+    - Financial health score calculation
+    - Complete PostgreSQL schema with 8 tables and optimized indexes
+    - Comprehensive test coverage (16 test cases)
+
+- [x] **Implement Home agent for automation** (2025-01-06)
+    - HomeAgent with device registry and control capabilities
+    - Protocol abstraction layer supporting MQTT, Zigbee, and HTTP
+    - Device discovery and automatic registration
+    - Scene management for controlling multiple devices
+    - Automation engine with time and state-based triggers
+    - Comprehensive test coverage for agent and protocols
+
+- [x] **Set up Prometheus and Grafana monitoring** (2025-01-06)
+    - Prometheus configuration with scrape targets for all services
+    - Custom metrics in FastAPI with prometheus-client
+    - Grafana dashboards for system overview
+    - Alert rules for critical system conditions
+    - Docker Compose configuration for monitoring stack
+    - Comprehensive monitoring documentation
+
+- [x] **Implement voice interface with Whisper** (2025-01-06)
     - VoiceAgent with OpenAI Whisper integration for speech-to-text
     - AudioStreamService for real-time audio capture with PyAudio
     - Voice Activity Detection (VAD) for automatic speech boundaries
@@ -212,6 +258,7 @@
     - WebSocket endpoints for voice streaming at /ws/voice
     - Frontend voice controls with audio visualization
     - Complete test coverage for both VoiceAgent and AudioStreamService
+    - Code formatting with Black and Prettier
 
 - [x] **Implement rate limiting and throttling** (2025-01-03)
     - Redis-backed sliding window algorithm for distributed rate limiting

@@ -1,0 +1,160 @@
+groups:
+  - name: sarah_alerts
+    interval: 30s
+    rules:
+      # API Health Alerts
+      - alert: APIDown
+        expr: up{job="sarah-api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "Sarah API is down"
+          description: "The main Sarah API has been down for more than 2 minutes."
+      
+      - alert: HighAPILatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="sarah-api"}[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High API response time"
+          description: "95th percentile of API response time is above 1 second for 5 minutes."
+      
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{job="sarah-api", status=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is above 5% for the last 5 minutes."
+      
+      # Database Alerts
+      - alert: PostgreSQLDown
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL database has been down for more than 1 minute."
+      
+      - alert: DatabaseConnectionsHigh
+        expr: pg_stat_database_numbackends{datname="sarah_db"} > 80
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "High number of database connections"
+          description: "Database connections are above 80 for 5 minutes."
+      
+      - alert: DatabaseSlowQueries
+        expr: rate(pg_stat_statements_mean_time_seconds{datname="sarah_db"}[5m]) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "Slow database queries detected"
+          description: "Average query time is above 500ms for 10 minutes."
+      
+      # Redis Alerts
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: redis
+        annotations:
+          summary: "Redis is down"
+          description: "Redis has been down for more than 1 minute."
+      
+      - alert: RedisMemoryHigh
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          component: redis
+        annotations:
+          summary: "Redis memory usage is high"
+          description: "Redis is using more than 90% of max memory for 5 minutes."
+      
+      # Agent Health Alerts
+      - alert: AgentDown
+        expr: sarah_agent_up == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: agents
+        annotations:
+          summary: "Agent {{ $labels.agent_id }} is down"
+          description: "Agent {{ $labels.agent_id }} has been down for more than 2 minutes."
+      
+      - alert: AgentHighMemory
+        expr: sarah_agent_memory_mb > 500
+        for: 10m
+        labels:
+          severity: warning
+          component: agents
+        annotations:
+          summary: "Agent {{ $labels.agent_id }} high memory usage"
+          description: "Agent {{ $labels.agent_id }} is using more than 500MB of memory."
+      
+      # System Resource Alerts
+      - alert: HighCPUUsage
+        expr: (1 - avg(rate(node_cpu_seconds_total{mode="idle"}[5m]))) > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is above 85% for 10 minutes."
+      
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is above 85% for 10 minutes."
+      
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) < 0.15
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "Low disk space"
+          description: "Less than 15% disk space remaining on root partition."
+      
+      # Rate Limiting Alerts
+      - alert: RateLimitExceeded
+        expr: rate(sarah_rate_limit_exceeded_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          component: security
+        annotations:
+          summary: "High rate limit violations"
+          description: "More than 10 rate limit violations per second for 5 minutes."
+      
+      # Backup Alerts
+      - alert: BackupFailed
+        expr: sarah_backup_last_success_timestamp < (time() - 86400)
+        for: 1h
+        labels:
+          severity: critical
+          component: backup
+        annotations:
+          summary: "Backup has not succeeded in 24 hours"
+          description: "The last successful backup was more than 24 hours ago."
