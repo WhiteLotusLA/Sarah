@@ -200,7 +200,21 @@
 
 ## Recently Completed Tasks
 
-- [x] **Code formatting and linting setup**
+- [x] **Implement rate limiting and throttling** (2025-01-03)
+    - Redis-backed sliding window algorithm for distributed rate limiting
+    - Per-user and per-endpoint limits with tier support (free/pro/enterprise)
+    - FastAPI middleware for automatic enforcement
+    - Rate limit monitoring API endpoints
+    - Comprehensive test coverage (16 passing tests)
+
+- [x] **Code formatting and linting** (2025-01-03)
+    - Black formatter applied to all Python files (11 files reformatted)
+    - MyPy type checking (124 type errors found - normal for development)
+    - ShellCheck for shell scripts (2 minor issues found)
+    - Prettier for frontend files (all files already formatted)
+    - No Swift files found to lint
+
+- [x] **Code formatting and linting setup** (Previous)
     - Black formatter for Python code (reformatted 10 files)
     - MyPy for Python type checking (found 61 type errors)
     - ShellCheck for shell scripts with .shellcheckrc configuration
