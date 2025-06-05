@@ -137,10 +137,13 @@
     - Pytest configuration with async support
     - Ready for CI integration
 
-- [ ] **Create integration tests for agent communication**
-    - End-to-end testing
-    - Message flow validation
-    - Performance testing
+- [x] **Create integration tests for agent communication**
+    - Comprehensive test infrastructure with fixtures
+    - Agent communication tests (direct, broadcast, priority)
+    - Message flow validation (workflows, error handling, events)
+    - Performance testing (throughput, latency, scalability)
+    - Test runner script with coverage support
+    - Complete test documentation
 
 - [x] **Create agent message protocol with Protocol Buffers**
     - Efficient binary serialization
@@ -148,15 +151,20 @@
     - Code generation
     - Note: Using dataclasses with JSON serialization instead
 
-- [ ] **Create backup and recovery system**
-    - Automated backups
-    - Point-in-time recovery
-    - Disaster recovery plan
+- [x] **Create backup and recovery system**
+    - Automated backups with daily, weekly, and monthly schedules
+    - Point-in-time recovery with selective component restore
+    - Disaster recovery plan with encrypted backups
+    - Complete BackupService with compression and retention policies
+    - API endpoints for backup management
+    - Comprehensive test coverage
 
-- [ ] **Implement rate limiting and throttling**
-    - API protection
-    - Per-user limits
-    - Graceful degradation
+- [x] **Implement rate limiting and throttling**
+    - API protection with sliding window algorithm
+    - Per-user and per-endpoint limits with tier support
+    - Graceful degradation with proper HTTP headers
+    - Redis-backed distributed rate limiting
+    - Complete test coverage (16 passing tests)
 
 ## Low Priority Tasks
 

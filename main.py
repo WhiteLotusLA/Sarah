@@ -18,7 +18,11 @@ import asyncpg  # type: ignore
 from sarah.core.consciousness import Consciousness
 from sarah.config import Config
 from sarah.api.auth_routes import router as auth_router
+from sarah.api.backup_routes import router as backup_router
+from sarah.api.rate_limit_routes import router as rate_limit_router
 from sarah.api.dependencies import init_auth_dependencies, get_current_user_optional
+from sarah.services.backup import backup_service
+from sarah.services.rate_limiter import rate_limiter, ThrottleMiddleware
 
 # Configure logging
 logging.basicConfig(
@@ -47,6 +51,8 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth_router)
+app.include_router(backup_router)
+app.include_router(rate_limit_router)
 
 # Global instances
 sarah: Optional[Consciousness] = None
@@ -69,6 +75,15 @@ async def startup_event():
     sarah = Consciousness()
     await sarah.awaken()
 
+    # Initialize backup service
+    await backup_service.initialize()
+
+    # Initialize rate limiter
+    await rate_limiter.initialize()
+
+    # Add rate limiting middleware
+    app.add_middleware(ThrottleMiddleware, rate_limiter=rate_limiter)
+
     logger.info("✨ Sarah AI is ready!")
 
 
@@ -76,6 +91,11 @@ async def startup_event():
 async def shutdown_event():
     """Graceful shutdown"""
     global sarah, db_pool
+
+    # Shutdown services
+    await backup_service.shutdown()
+    await rate_limiter.shutdown()
+
     if sarah:
         await sarah.sleep()
     if db_pool:
